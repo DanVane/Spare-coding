@@ -50,21 +50,27 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
             print "the index is", idx1[0:maxn]
             xinit[idx1[0:maxn]] = Xinit_col[idx1[0:maxn]]
             print "xinit is now:", xinit
-            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma, xinit))
-        else:
-            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma))
+            print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
+            print [A,Y[:,i], AtA, AtY, gamma, xinit]
 
+            # the index zero is because featuresign_sub returns 2 values,
+            # we are only interested in the first one.
+            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma, xinit)[0])
+            print "YOU SHOULD GET THESE OUT PUTS"
+            print ret
+        else:
+
+            print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
+            print [A,Y[:,i], AtA, AtY, gamma]
+            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma)[0])
+            print "YOU SHOULD GET THESE OUT PUTS"
+            print ret
     return ret
 
 '''
 testing first function
 '''
-A = np.array([[1,2,3],[4,5,6],[7,8,9]])
-y = np.array([1,5,5])
-gamma = 0.2
-X = np.array([2,1,2])
 
-ret = l1ls_featuresign(A, y, gamma, X)
 
 
 
@@ -92,7 +98,7 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
     fobj = 0
 
-    ITERMAX = 1000
+    ITERMAX = 3
     optimality1 = False
     print "AtA, x, Aty = ", AtA, x, Aty
     i = 0
@@ -107,13 +113,23 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
         theta = np.sign(x) #TODO: sin't this repeated?
 
         optimality0 = False
-        mx = max(abs(grad[act_idx0]))
+        noMx = False
+        mx = -1
+        try:
+            mx = max(abs(grad[act_idx0]))
+            mx_idx = np.where(abs(grad[act_idx0]) == mx)
+            print "mx {0}and mx indx at{1}".format(mx, mx_idx)
+        except Exception:
+            noMx = True
+            print "DID NOT FIND MAX GRADIENT"
         #This is the index in the act_idx0 array, NOT the grad array
-        mx_idx = np.where(abs(grad[act_idx0]) == mx)
-        print "mx {0}and mx indx at{1}".format(mx, mx_idx)
 
-        if mx>=gamma and (i>0 or not usexinit):
+
+        if not noMx and mx>=gamma and (i>0 or (not usexinit)):
+            print "I'M IN HERE"
+
             act[act_idx0[mx_idx]] = 1
+            print"act is", act
             theta[act_idx0[mx_idx]] = -np.sign(grad[act_idx0[mx_idx]])
             usexinit = False
         else:
@@ -132,8 +148,11 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
         if len(act_idx1) == 0:
             if allowZero:
+
+                print "IM CHEKCING ALLOW zero"
                 allowZero = False
                 continue
+            return
 
         k = 0
         while True:
@@ -147,10 +166,15 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
                     break
                 else:
                     return x, fobj
+            print "Use These values for compute FS step input:"
+            print [x, act, act_idx1,]
 
-            x, theta, act, act_idx1, optimality1, lsearch, fobj = \
+            [x, theta, act, act_idx1, optimality1, lsearch, fobj] = \
                 compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma)
-
+            print "done with compute FS step and outputs are "
+            print x, act_idx1, lsearch
+            # print "you should get these outputs from compute FS step:"
+            # print [x, theta, act, act_idx1, optimality1, lsearch, fobj]
             # Step 4: check optimality condition 1
             if optimality1:
                 break
@@ -160,6 +184,10 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
     if i >= ITERMAX:
         print "(a)Exceeding maximum number of iterations, solution might not be optimal"
 
+
+
+    print "CHECKING inputs values of fobj_featuresign within sub"
+    print []
     fobj, objA = fobj_featuresign(x, A, y, AtA, Aty, gamma)
     return x, fobj
 
@@ -175,6 +203,7 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
 def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
 
+    x = x.astype(float)
     x2 = x[act_idx1]
     AtA2 = AtA[:,act_idx1][act_idx1,:]
     theta2 = theta[act_idx1]
@@ -196,7 +225,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
         optimality1 = True
 
         x[act_idx1] = x_new
-        lsearch = 1
+        lsearch = 1.0
         # The following comment from author seems to be what the original condition should be
         # But for some reason we assumed this to be 0
         fobj = 0 # fob_featuresign(x, A, y, AtA, Aty, gamma)
@@ -207,7 +236,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
 
     ''' line search '''
     progress = np.true_divide((0-x2), x_new-x2)
-    lsearch = 0
+    lsearch = 0.0
     a= 0.5*sum(np.power(np.dot(A[:, act_idx1],(x_new- x2)), 2))
     b= np.dot(x2,np.dot(AtA2,(x_new- x2))) - np.dot(np.transpose(x_new- x2),Aty[act_idx1])
 
@@ -242,12 +271,6 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
                 if t<1:
                     remove_idx.append(ix_lsearch[i])
 
-
-
-
-
-
-
     # Updating the result of line search I THINK
     if lsearch>0:
         x_new = x2 + (x_new-x2)*lsearch
@@ -263,21 +286,64 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
         act[act_idx1[remove_idx]] = 0
         # act_idx1 = act_idx1[remove_idx]
         act_idx1 = np.where(act != 0)[0]
-
+    print "the type of x is ",type(x), type(x[0])
     return [x, theta, act, act_idx1, optimality1, lsearch, fobj]
 
 
 def fobj_featuresign(x, A, y, AtA, Aty, gamma):
-    f= 0.5*sum(abs((y-A*x)))**2
+    f= 0.5*sum((y-np.dot(A,x))**2)
     f= f+ gamma*sum(abs((x)))
 
     # if nargout >1:  # Still not sure what this thing is doing
-    g= AtA*x - Aty
+    g= np.dot(AtA,x) - Aty
     g= g+ gamma*np.sign(x)
 
     return f, g
 
 
+
+A = np.array([[1,2,3],[4,5,6],[7,8,9]])
+y = np.array([1,5,5])
+gamma = 0.2
+X = np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+
+act=  np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+
+theta = np.array([ 0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  1.,  0.,  0.,  0.,  0.,  0.,
+        0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.,  0.])
+act_idx1 = np.array([46])
+
+AtA = np.dot(np.transpose(AA),AA)
+Aty = np.dot(np.transpose(AA),y)
+
+fobj_featuresign(X, A, y, AtA, Aty, gamma)
+
+ret = l1ls_featuresign(A, y, gamma, X)
+
+
+ls_featuresign_sub(A, y, AtA, Aty, gamma, np.array([0,0,0]))
+
+compute_FS_step(X, AA, y, AtA, Aty, theta, act, act_idx1, gamma)
+
+import matplotlib.pyplot as plt
+import cv2
+A = cv2.imread("/Users/stevenydc/Documents/3rd year/Math 191/IM-4562-0002.64x64.jpg")
+AA = A[:,:,0].astype(float)
+plt.imshow(AA)
+
+y = np.array([54,25,2,5,44,27,23,47,14,51,9,41,30,59,61,6,3,26,63,8,19,10,17,33,18,46,42,55,52,7,12,37,13,21,22,34,48,60,53,57,35,24,28,16,15,50,32,1,4,40,39,58,0,45,56,43,36,31,29,38,11,62,20,49])
+ret = l1ls_featuresign(AA, y, gamma)
 
 
 import timeit
