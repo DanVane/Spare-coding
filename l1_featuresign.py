@@ -20,12 +20,12 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
         AtY = np.dot(A.transpose(), Y).ravel()
     except ValueError, e:
         print "ERROR: Dimension of A or Dimension of Y not valid"
-        print "Y can be 1D numpy array, or 2D matrix with number or rows¡ == number of rows of A"
+        print "Y can be 1D numpy array, or 2D matrix with number or rows !== number of rows of A"
         print e
 
     #rankA is not actually the rank of A, just a limit on dimension
     #that will be applied later on the number of non zeros in x
-    rankA = min(len(A)-1, len(A[0])-1)     #TODO: originally -10 but for testing we have rank=3 so
+    rankA = min(len(A)-1, len(A[0])-1)   #TODO: originally -10 but for testing we have rank=3 so
 
     #ret is the result (Xout) of our featuresign step
     #after minimizing 0.5*||y-A*x||^2 + gamma*||x||_1
