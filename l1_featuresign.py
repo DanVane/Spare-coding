@@ -49,19 +49,19 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
             print "xinit is currently:", xinit
             print "the index is", idx1[0:maxn]
             xinit[idx1[0:maxn]] = Xinit_col[idx1[0:maxn]]
-            print "xinit is now:", xinit
-            print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
-            print [A,Y[:,i], AtA, AtY, gamma, xinit]
+            # print "xinit is now:", xinit
+            # print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
+            # print [A,Y[:,i], AtA, AtY, gamma, xinit]
 
             # the index zero is because featuresign_sub returns 2 values,
             # we are only interested in the first one.
             ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma, xinit)[0])
-            print "YOU SHOULD GET THESE OUT PUTS"
-            print ret
+            # print "YOU SHOULD GET THESE OUT PUTS"
+            # print ret
         else:
 
-            print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
-            print [A,Y[:,i], AtA, AtY, gamma]
+            # print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
+            # print [A,Y[:,i], AtA, AtY, gamma]
             ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma)[0])
             print "YOU SHOULD GET THESE OUT PUTS"
             print ret
@@ -98,18 +98,21 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
     fobj = 0
 
-    ITERMAX = 3
+    ITERMAX = 1000
     optimality1 = False
-    print "AtA, x, Aty = ", AtA, x, Aty
+    # print "AtA, x, Aty = ", AtA, x, Aty
     i = 0
-    for i in range(ITERMAX):
+    for j in range(ITERMAX):
+        i+=1
+        print "outter loops iteration",i,
+        # print zip(np.where(x!=0)[0],x[np.where(x!=0)[0]])
         act_idx0 = np.where(act == 0)[0] #TODO: this does not work well when act is sparse
-        print "act_idx0", act_idx0
+        # print "act_idx0", act_idx0
 
         # Step 2:
         #TODO: Is this the Gradient of ||y-Ax||^2 wrt every x?
         grad = np.dot(AtA, x) - Aty
-        print "grad =",grad
+        # print "grad =",grad
         theta = np.sign(x) #TODO: sin't this repeated?
 
         optimality0 = False
@@ -117,7 +120,10 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
         mx = -1
         try:
             mx = max(abs(grad[act_idx0]))
+            #TODO: there seem to be two numbers at iteration j==146?
             mx_idx = np.where(abs(grad[act_idx0]) == mx)
+            mx_idx = mx_idx[0][0]
+
             print "mx {0}and mx indx at{1}".format(mx, mx_idx)
         except Exception:
             noMx = True
@@ -126,10 +132,10 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
 
         if not noMx and mx>=gamma and (i>0 or (not usexinit)):
-            print "I'M IN HERE"
+            # print "I'M IN HERE"
 
             act[act_idx0[mx_idx]] = 1
-            print"act is", act
+            # print"act is", act
             theta[act_idx0[mx_idx]] = -np.sign(grad[act_idx0[mx_idx]])
             usexinit = False
         else:
@@ -139,8 +145,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
         # either optimality 0 is not satisfied or optimlaity 1 is not satisfied
         act_idx1 = np.where(act == 1)[0]
-        print "act_idx1 is this", act_idx1
-        print "rankA", rankA
+        # print "act_idx1 is this", act_idx1
+        # print "rankA", rankA
         if len(act_idx1)>rankA:
             print "Sparsity penalty is too small: too many coefficients"
 
@@ -149,7 +155,7 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
         if len(act_idx1) == 0:
             if allowZero:
 
-                print "IM CHEKCING ALLOW zero"
+                # print "IM CHEKCING ALLOW zero"
                 allowZero = False
                 continue
             return
@@ -158,7 +164,7 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
         while True:
             k += 1
             if k>ITERMAX:
-                print "(b)Exceeding maximum number of iterations, solution might not be optimal"
+                print "(a)Exceeding maximum number of iterations, solution might not be optimal"
                 return x, fobj
             if len(act_idx1) == 0:
                 if allowZero:
@@ -166,13 +172,15 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
                     break
                 else:
                     return x, fobj
-            print "Use These values for compute FS step input:"
-            print [x, act, act_idx1,]
-
+            # print "Use These values for compute FS step input:"
+            # print [x, act, act_idx1,]
+            if i == 144 and k==1:
+                print 'x:',x,'\n', 'theta:', theta, 'act',act
             [x, theta, act, act_idx1, optimality1, lsearch, fobj] = \
                 compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma)
-            print "done with compute FS step and outputs are "
-            print x, act_idx1, lsearch
+            print k
+            # print "done with compute FS step and outputs are "
+            # print x, act_idx1, lsearch
             # print "you should get these outputs from compute FS step:"
             # print [x, theta, act, act_idx1, optimality1, lsearch, fobj]
             # Step 4: check optimality condition 1
@@ -182,12 +190,12 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
                 continue #TODO: continue just goes to the next while iteration... does this even do anything?
 
     if i >= ITERMAX:
-        print "(a)Exceeding maximum number of iterations, solution might not be optimal"
+        print "(b)Exceeding maximum number of iterations, solution might not be optimal"
 
 
 
     print "CHECKING inputs values of fobj_featuresign within sub"
-    print []
+    # print []
     fobj, objA = fobj_featuresign(x, A, y, AtA, Aty, gamma)
     return x, fobj
 
@@ -219,7 +227,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
     # This step seems to be checking optimality1.. which seems to be condition a in the paper
     # But the conditions used seem to be quite different
 
-    if all(np.sign(x_new) == np.sign(x2)):
+    if all([np.sign(tx).astype(int) == np.sign(ty).astype(int) for tx, ty in zip(x_new, x2)]):
         # I think optimality1 == condition A and is true when
         # objA == 0, or < eps
         optimality1 = True
@@ -231,7 +239,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
         fobj = 0 # fob_featuresign(x, A, y, AtA, Aty, gamma)
         print "Optimality 1 is satisfied in compute_FS_step!"
         return [x, theta, act, act_idx1, optimality1, lsearch, fobj]
-    
+
 
 
     ''' line search '''
@@ -286,7 +294,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
         act[act_idx1[remove_idx]] = 0
         # act_idx1 = act_idx1[remove_idx]
         act_idx1 = np.where(act != 0)[0]
-    print "the type of x is ",type(x), type(x[0])
+    # print "the type of x is ",type(x), type(x[0])
     return [x, theta, act, act_idx1, optimality1, lsearch, fobj]
 
 
@@ -300,5 +308,20 @@ def fobj_featuresign(x, A, y, AtA, Aty, gamma):
 
     return f, g
 
+
+
+y = np.array([118,  19, 151, 133,  37, 154, 168, 126,  43,   4, 113, 127,  60,
+        59,  34,  46,  85,  61, 172,  90,  93, 150,  78, 129, 177, 143,
+        62, 190,  46,  26, 171, 156,  95,  73,   8,  32,  35, 168, 132,
+       179, 189, 144, 114,  42,  77, 157,  88, 101,  48,  36, 151,  33,
+        90, 136,  48,  22, 122,  15,  32, 101, 192,   8,  17, 171,  16,
+        48, 134,  52,  69, 125, 158,  23,  59, 118, 141, 139, 107,  43,
+       172,  38,  37,  62,  97, 155,  33, 130, 193, 157, 198, 174, 145,
+       148,  12, 121, 176, 136,  56,  64, 181,  68,  72, 167,  23,  76,
+        63,  94, 108, 104,  91, 132, 168, 100,  80, 150, 184, 149,  46,
+        34, 199, 167, 188, 186,  32,  61, 139, 175, 132, 187,  11, 100,
+         8, 164, 149,   5,  71,  11,  89, 188,  53, 150, 188, 111, 197,
+        90,  57,  94, 178,  35,  99, 110,  89, 136,  81, 133,  48, 179,
+       118, 152,  34,  27]).astype(float)
 
 
