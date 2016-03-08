@@ -66,7 +66,7 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
             ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY[:,i], gamma)[0])
             # print "YOU SHOULD GET THESE OUT PUTS"
             # print ret
-    return ret
+    return np.array(ret).transpose()
 
 '''
 testing first function

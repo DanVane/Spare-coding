@@ -49,6 +49,9 @@ A= io.loadmat("/Users/stevenydc/Documents/3rd year/Math 191/test3.mat")
 Xb= io.loadmat("/Users/stevenydc/Documents/3rd year/Math 191/Xb.mat")
 B= io.loadmat("/Users/stevenydc/Documents/3rd year/Math 191/B.mat")
 
+Xb = Xb['Xb']
+B = B['B']
+
 A = A['gray']
 A=A.astype(float)
 gamma = 0.2
