@@ -40,15 +40,15 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
             print '.'
         if use_Xinit:
             Xinit_col = Xinit[:,i].ravel()
-            print "Xinit_col", Xinit_col
+            # print "Xinit_col", Xinit_col
             idx1 = np.where(Xinit_col != 0)[0]
 
-            print "idx1 is ", idx1
+            # print "idx1 is ", idx1
             maxn = min(len(idx1), rankA)
-            print "maxn", maxn
+            # print "maxn", maxn
             xinit = np.zeros(Xinit_col.shape)
-            print "xinit is currently:", xinit
-            print "the index is", idx1[0:maxn]
+            # print "xinit is currently:", xinit
+            # print "the index is", idx1[0:maxn]
             xinit[idx1[0:maxn]] = Xinit_col[idx1[0:maxn]]
             # print "xinit is now:", xinit
             # print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
@@ -64,8 +64,8 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
             # print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
             # print [A,Y[:,i], AtA, AtY, gamma]
             ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY[:,i], gamma)[0])
-            print "YOU SHOULD GET THESE OUT PUTS"
-            print ret
+            # print "YOU SHOULD GET THESE OUT PUTS"
+            # print ret
     return ret
 
 '''
@@ -105,8 +105,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
     i = 0
     for j in range(ITERMAX):
         i+=1
-        if i>=610:
-            print "outter loops iteration",i,
+        # if i>=610:
+        #     print "outter loops iteration",i,
         # print zip(np.where(x!=0)[0],x[np.where(x!=0)[0]])
         act_idx0 = np.where(act == 0)[0] #TODO: this does not work well when act is sparse
         # print "act_idx0", act_idx0
@@ -126,8 +126,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
             mx_idx = np.where(abs(grad[act_idx0]) == mx)
             mx_idx = mx_idx[0][0]
 
-            if i>=610:
-                print "mx {0}and mx indx at{1}".format(mx, mx_idx)
+            # if i>=610:
+            #     print "mx {0}and mx indx at{1}".format(mx, mx_idx)
         except Exception:
             noMx = True
             print "DID NOT FIND MAX GRADIENT"
@@ -157,11 +157,10 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
 
         if len(act_idx1) == 0:
             if allowZero:
-
                 # print "IM CHEKCING ALLOW zero"
                 allowZero = False
                 continue
-            return
+            return x, fobj
 
         k = 0
         while True:
@@ -177,12 +176,12 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
                     return x, fobj
             # print "Use These values for compute FS step input:"
             # print [x, act, act_idx1,]
-            if i == 144 and k==1:
-                print 'x:',x,'\n', 'theta:', theta, 'act',act
+            # if i == 144 and k==1:
+            #     print 'x:',x,'\n', 'theta:', theta, 'act',act
             [x, theta, act, act_idx1, optimality1, lsearch, fobj] = \
                 compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma)
-            if i>= 610:
-                print k
+            # if i>= 610:
+            #     print k
             # print "done with compute FS step and outputs are "
             # print x, act_idx1, lsearch
             # print "you should get these outputs from compute FS step:"
