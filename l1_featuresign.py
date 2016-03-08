@@ -25,7 +25,7 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
 
     #rankA is not actually the rank of A, just a limit on dimension
     #that will be applied later on the number of non zeros in x
-    rankA = min(len(A)-1, len(A[0])-1)   #TODO: originally -10 but for testing we have rank=3 so
+    rankA = min(len(A)-10, len(A[0])-10)   #TODO: originally -10 but for testing we have rank=3 so
 
     #ret is the result (Xout) of our featuresign step
     #after minimizing 0.5*||y-A*x||^2 + gamma*||x||_1
@@ -77,7 +77,7 @@ testing first function
 def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
     '''Step 1 initialize'''
     [L, M] = A.shape
-    rankA = min(len(A)-1, len(A[0])-1)  #Why?
+    rankA = min(len(A)-10, len(A[0])-10)  #Why?
     usexinit = False
     if len(xinit)==0:
         xinit       = np.array([]) #TODO: I don't think this value is used
@@ -104,7 +104,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
     i = 0
     for j in range(ITERMAX):
         i+=1
-        print "outter loops iteration",i,
+        if i>=610:
+            print "outter loops iteration",i,
         # print zip(np.where(x!=0)[0],x[np.where(x!=0)[0]])
         act_idx0 = np.where(act == 0)[0] #TODO: this does not work well when act is sparse
         # print "act_idx0", act_idx0
@@ -124,7 +125,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
             mx_idx = np.where(abs(grad[act_idx0]) == mx)
             mx_idx = mx_idx[0][0]
 
-            print "mx {0}and mx indx at{1}".format(mx, mx_idx)
+            if i>=610:
+                print "mx {0}and mx indx at{1}".format(mx, mx_idx)
         except Exception:
             noMx = True
             print "DID NOT FIND MAX GRADIENT"
@@ -178,7 +180,8 @@ def ls_featuresign_sub(A, y, AtA, Aty, gamma, xinit = np.array([])):
                 print 'x:',x,'\n', 'theta:', theta, 'act',act
             [x, theta, act, act_idx1, optimality1, lsearch, fobj] = \
                 compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma)
-            print k
+            if i>= 610:
+                print k
             # print "done with compute FS step and outputs are "
             # print x, act_idx1, lsearch
             # print "you should get these outputs from compute FS step:"
@@ -237,7 +240,7 @@ def compute_FS_step(x, A, y, AtA, Aty, theta, act, act_idx1, gamma):
         # The following comment from author seems to be what the original condition should be
         # But for some reason we assumed this to be 0
         fobj = 0 # fob_featuresign(x, A, y, AtA, Aty, gamma)
-        print "Optimality 1 is satisfied in compute_FS_step!"
+        # print "Optimality 1 is satisfied in compute_FS_step!"
         return [x, theta, act, act_idx1, optimality1, lsearch, fobj]
 
 
@@ -309,19 +312,19 @@ def fobj_featuresign(x, A, y, AtA, Aty, gamma):
     return f, g
 
 
-
-y = np.array([118,  19, 151, 133,  37, 154, 168, 126,  43,   4, 113, 127,  60,
-        59,  34,  46,  85,  61, 172,  90,  93, 150,  78, 129, 177, 143,
-        62, 190,  46,  26, 171, 156,  95,  73,   8,  32,  35, 168, 132,
-       179, 189, 144, 114,  42,  77, 157,  88, 101,  48,  36, 151,  33,
-        90, 136,  48,  22, 122,  15,  32, 101, 192,   8,  17, 171,  16,
-        48, 134,  52,  69, 125, 158,  23,  59, 118, 141, 139, 107,  43,
-       172,  38,  37,  62,  97, 155,  33, 130, 193, 157, 198, 174, 145,
-       148,  12, 121, 176, 136,  56,  64, 181,  68,  72, 167,  23,  76,
-        63,  94, 108, 104,  91, 132, 168, 100,  80, 150, 184, 149,  46,
-        34, 199, 167, 188, 186,  32,  61, 139, 175, 132, 187,  11, 100,
-         8, 164, 149,   5,  71,  11,  89, 188,  53, 150, 188, 111, 197,
-        90,  57,  94, 178,  35,  99, 110,  89, 136,  81, 133,  48, 179,
-       118, 152,  34,  27]).astype(float)
+#
+# y = np.array([118,  19, 151, 133,  37, 154, 168, 126,  43,   4, 113, 127,  60,
+#         59,  34,  46,  85,  61, 172,  90,  93, 150,  78, 129, 177, 143,
+#         62, 190,  46,  26, 171, 156,  95,  73,   8,  32,  35, 168, 132,
+#        179, 189, 144, 114,  42,  77, 157,  88, 101,  48,  36, 151,  33,
+#         90, 136,  48,  22, 122,  15,  32, 101, 192,   8,  17, 171,  16,
+#         48, 134,  52,  69, 125, 158,  23,  59, 118, 141, 139, 107,  43,
+#        172,  38,  37,  62,  97, 155,  33, 130, 193, 157, 198, 174, 145,
+#        148,  12, 121, 176, 136,  56,  64, 181,  68,  72, 167,  23,  76,
+#         63,  94, 108, 104,  91, 132, 168, 100,  80, 150, 184, 149,  46,
+#         34, 199, 167, 188, 186,  32,  61, 139, 175, 132, 187,  11, 100,
+#          8, 164, 149,   5,  71,  11,  89, 188,  53, 150, 188, 111, 197,
+#         90,  57,  94, 178,  35,  99, 110,  89, 136,  81, 133,  48, 179,
+#        118, 152,  34,  27]).astype(float)
 
 
