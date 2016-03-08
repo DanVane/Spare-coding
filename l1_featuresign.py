@@ -12,7 +12,7 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
 
     use_Xinit = False
     # make Y and Xinit into a matrix (column vector) if not already
-    Y = np.expand_dims(Y).transpose() if len(Y.shape)==1 else Y
+    Y = np.expand_dims(Y, axis=0).transpose() if len(Y.shape)==1 else Y
 
     Xinit = np.array([Xinit]).transpose()
 
