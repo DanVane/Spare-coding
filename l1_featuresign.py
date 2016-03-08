@@ -12,12 +12,13 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
 
     use_Xinit = False
     # make Y and Xinit into a matrix (column vector) if not already
-    Y = np.array([Y]).transpose() if len(Y.shape)==1 else Y
+    Y = np.expand_dims(Y).transpose() if len(Y.shape)==1 else Y
+
     Xinit = np.array([Xinit]).transpose()
 
     try:
         AtA = np.dot(A.transpose(), A)
-        AtY = np.dot(A.transpose(), Y).ravel()
+        AtY = np.dot(A.transpose(), Y)
     except ValueError, e:
         print "ERROR: Dimension of A or Dimension of Y not valid"
         print "Y can be 1D numpy array, or 2D matrix with number or rows !== number of rows of A"
@@ -55,14 +56,14 @@ def l1ls_featuresign(A, Y, gamma, Xinit=np.array([])):
 
             # the index zero is because featuresign_sub returns 2 values,
             # we are only interested in the first one.
-            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma, xinit)[0])
+            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY[:,i], gamma, xinit)[0])
             # print "YOU SHOULD GET THESE OUT PUTS"
             # print ret
         else:
 
             # print "You SHOULD RUN THESE INPUTS FOR ls_featuresign_sub"
             # print [A,Y[:,i], AtA, AtY, gamma]
-            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY, gamma)[0])
+            ret.append(ls_featuresign_sub(A,Y[:,i], AtA, AtY[:,i], gamma)[0])
             print "YOU SHOULD GET THESE OUT PUTS"
             print ret
     return ret
