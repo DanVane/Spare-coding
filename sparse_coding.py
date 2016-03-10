@@ -35,7 +35,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     else:
         X = X_total
     
-
+    X = numpy.expand_dims(X, axis=0).transpose() if len(X.shape)==1 else X
     patch_size = X.shape[0]
     num_patches = X.shape[1]
     num_bases = num_bases
@@ -51,13 +51,13 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     VAR_basis = 1
 
     if 'display_images' not in locals():
-    	display_images = False	
+        display_images = False
     if 'display_every' not in locals():
-       	display_every = 1
+        display_every = 1
     if 'save_every' not in locals():
-    	save_every = 1
+        save_every = 1
     if 'save_basis_timestamps' not in locals():
-    	save_basis_timestamps = True
+        save_basis_timestamps = True
     
 
 # Sparsity parameters
@@ -68,7 +68,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     if sparsity_func=='epsL1':
         reuse_coeff = False
     else:
-    	epsilon = []
+        epsilon = []
 #--------- this empty [] is suspicious... 
         reuse_coeff = True
 
@@ -83,7 +83,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     if Binit == []:
         print('no binit here...')
         B = numpy.random.rand(patch_size,num_bases)-0.5
-    	B = B - numpy.tile(numpy.mean(B,axis = 0), (X.shape[0],1))
+        B = B - numpy.tile(numpy.mean(B,axis = 0), (X.shape[0],1))
         #print B.shape
         
         B = numpy.dot(B , numpy.diag(numpy.divide(1,numpy.sqrt(numpy.sum(B*B,axis=0)))))
@@ -105,8 +105,8 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     # initialize t only if it does not exist
     #not sure is t a local or not
     if 't' not in locals():
-    	t = 0	
-    	# statistics variable
+        t = 0
+        # statistics variable
     	fobj_avg = []
         fresidue_avg = []
         fsparsity_avg = []
@@ -117,7 +117,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
         svar_tot = 0
         elapsed_time = 0
     else:
-    	# make sure that everything is continuous
+        # make sure that everything is continuous
     	t = numpy.size(fobj_avg,0) - 1 
 
 
@@ -243,7 +243,8 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
     print var_avg
     print svar_avg
 
-    return
+    return B, S_all
 
 ##don't need extea assert function, using python's own.
+
 

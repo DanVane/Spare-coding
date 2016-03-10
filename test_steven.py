@@ -31,21 +31,23 @@ import cv2
 #print A
 #print ret
 
-
-img = cv2.imread("/Users/stevenydc/Documents/3rd year/Math 191/test.jpg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
-img
-
+img = scipy.io.loadmat("/Users/stevenydc/Documents/3rd year/Math 191/test.mat")
+img = img['A']
+# img = cv2.imread("/Users/stevenydc/Documents/3rd year/Math 191/test.jpg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
+# img
+plt.imshow(img,'gray')
 sift = cv2.SIFT()
 kp, des = sift.detectAndCompute(img,None)
 print des.shape
 
-img=cv2.drawKeypoints(img,kp)
-plt.imshow(img, 'gray')
+img2=cv2.drawKeypoints(img,kp)
+plt.imshow(img2, 'gray')
 # cv2.imwrite('sift_keypoints.jpg',img)
 
 
 
 NUMBER_OF_FEATURE_POINTS = 100
+np.random.seed(1234)
 idx = np.random.randint(0,des.shape[0], 100)
 
 X=des[idx, :].ravel()
@@ -58,8 +60,12 @@ num_iters = 100
 sparsity_func = 'L1'
 epsilon = []
 fname_save = "/Users/stevenydc/Documents/3rd year/Math 191/"
-#X = getdata_imagearray.getdata_imagearray(IMAGES,14,10000)
-#print X.shape
+
 Binit = []
-sparse_coding.sparse_coding(X, num_bases, beta, sparsity_func, epsilon, num_iters, batch_size, fname_save, Binit);
+
+
+B, S  = sparse_coding.sparse_coding(X, num_bases, beta, sparsity_func, epsilon, num_iters, batch_size, fname_save, Binit);
 # Fast sparse cod
+
+print "B:", B
+print "S:", S
