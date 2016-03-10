@@ -164,7 +164,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
                 #else:
                 #    S = cgf_fitS_sc2(B, Xb, sparsity_func, noise_var, beta, epsilon, sigma, tol, False, False, False)
                 #not sure about 0's type
-                numpy.nan_to_num(S)
+                S = numpy.nan_to_num(S)
                 print S.shape
                 print S_all[:,batch_idx].shape
                 S_all[:,batch_idx] = S
@@ -178,7 +178,7 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
                 #else:
                 #    S = cgf_fitS_sc2(B, Xb, sparsity_func, noise_var, beta, epsilon, sigma, tol, False, False, False, S_all[:,batch_idx])
 
-                numpy.nan_to_num(S)
+                S = numpy.nan_to_num(S)
                 S_all[:,batch_idx] = S        
             if sparsity_func =='L1' or sparsity_func == 'LARS' or sparsity_func == 'FS':
                 sparsity_S = numpy.count_nonzero(S)*1.0 /numpy.size(S)
@@ -197,7 +197,11 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
             fresidue_total  = fresidue_total + fresidue
             fsparsity_total = fsparsity_total + fsparsity
           ###may have problem here?
-            var_tot         = var_tot + numpy.size(numpy.square(S))*1.0/S.shape[0]
+            #print 'var_tot'
+            #print numpy.isinf(S).any()
+            #print numpy.isnan(S).any()
+            
+            var_tot = var_tot + numpy.sum(numpy.sum(S ** 2,axis=0),axis=0)*1.0 / S.shape[0]
             
             # update basis
             B = l2_learn_basis_dual.l2ls_learn_basis_dual(Xb, S, VAR_basis)
@@ -233,6 +237,12 @@ def sparse_coding(X_total, num_bases, beta, sparsity_func, epsilon, num_iters, b
         #    print "saved as %s\n" % experiment.matfname
         print "one more run turn:%d\n" % run
         run = run + 1
+    print fobj_avg 
+    print fresidue_avg
+    print fsparsity_avg
+    print var_avg
+    print svar_avg
+
     return
 
 ##don't need extea assert function, using python's own.
