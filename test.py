@@ -5,17 +5,22 @@ import getdata_imagearray
 import numpy as np
 import scipy.io
 import sys
-import matplotlib.pylab as plt
+import time
 
+import matplotlib.pyplot as plt
 import cv2
 #Xb = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/Xb.mat")
 #Xb=Xb['Xb']
-#B = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B.mat")
-#B = B['B']
-# X = scipy.io.loadmat("/Users/stevenydc/Documents/3rd year/Math 191/test2.mat")
-# X = X['X']
+B = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B.mat")
+B = B['B']
+#print B.shape
+S = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S.mat")
+S = S['S']
+#print S.shape
+X = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/X.mat")
+X = X['X']
 #IMAGES = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/IMAGES.mat")
-#IMAGES = IMAGES['IMAGES']
+#IMAGES = IMAGES['IMAGES']*256
 #S = np.array([[9,8,7,6],[6,5,4,3],[3,2,1,0],[10,11,12,13]])
 #print l2_learn_basis_dual.l2ls_learn_basis_dual(X,S,1)
 #A = scipy.io.loadmat("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/matlab.mat")
@@ -32,34 +37,79 @@ import cv2
 #print ret
 
 
-img = cv2.imread("/Users/stevenydc/Documents/3rd year/Math 191/test.jpg", cv2.CV_LOAD_IMAGE_GRAYSCALE)
-img
+#img = cv2.imread("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/test1.jpg")
+#print img
+#gray= cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
+#print gray
+#sift = cv2.SIFT()
+#print IMAGES[:,:,0]
+#kp, des = sift.detectAndCompute(IMAGES[:,:,0],None)
+#print des.shape
+#img=cv2.drawKeypoints(gray,kp)
 
-sift = cv2.SIFT()
-kp, des = sift.detectAndCompute(img,None)
-print des.shape
-
-img=cv2.drawKeypoints(img,kp)
-plt.imshow(img, 'gray')
-# cv2.imwrite('sift_keypoints.jpg',img)
+#cv2.imwrite('sift_keypoints.jpg',img)
 
 
 
-NUMBER_OF_FEATURE_POINTS = 100
-idx = np.random.randint(0,des.shape[0], 100)
-
-X=des[idx, :].ravel()
 
 
 num_bases = 128
 beta = 0.4
 batch_size = 1000
-num_iters = 100
 sparsity_func = 'L1'
 epsilon = []
-fname_save = "/Users/stevenydc/Documents/3rd year/Math 191/"
-#X = getdata_imagearray.getdata_imagearray(IMAGES,14,10000)
-#print X.shape
 Binit = []
-sparse_coding.sparse_coding(X, num_bases, beta, sparsity_func, epsilon, num_iters, batch_size, fname_save, Binit);
+
+fname_save = "/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/results/result"
+timing = []
+#X1 = getdata_imagearray.getdata_imagearray(IMAGES,14,10000)
+#X2 = getdata_imagearray.getdata_imagearray(IMAGES,14,10000)
+
+#print np.linalg.norm(X1-X2,'fro')
+ 
+
+num_iters = 100
+#X = getdata_imagearray.getdata_imagearray(IMAGES,14,10000)
+start = time.time()
+#sparse_coding.sparse_coding(X, num_bases, beta, sparsity_func, epsilon, num_iters, batch_size, fname_save, Binit);
+end = time.time()
+timing.append(end - start)
+
+print timing
+
+Bp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B-1.txt")
+Sp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S-1.txt")
+#print np.linalg.norm(np.dot(B,S),'fro')
+print np.linalg.norm(np.dot(Bp,Sp),'fro')
+print np.linalg.norm(np.subtract(X , np.dot(Bp,Sp)))
+print 
+
+Bp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B-30.txt")
+Sp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S-30.txt")
+#print np.linalg.norm(np.dot(B,S),'fro')
+print np.linalg.norm(np.dot(Bp,Sp),'fro')
+print np.linalg.norm(np.subtract(X , np.dot(Bp,Sp)))
+print 
+
+#Bp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B-50.txt")
+#Sp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S-50.txt")
+#print np.linalg.norm(np.dot(B,S),'fro')
+print np.linalg.norm(np.dot(Bp,Sp),'fro')
+print np.linalg.norm(np.subtract(X , np.dot(Bp,Sp)))
+print 
+
+#Bp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B-80.txt")
+#Sp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S-80.txt")
+#print np.linalg.norm(np.dot(B,S),'fro')
+print np.linalg.norm(np.dot(Bp,Sp),'fro')
+print np.linalg.norm(np.subtract(X , np.dot(Bp,Sp)))
+print 
+
+#Bp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/B-100.txt")
+#Sp = np.loadtxt("/Users/weijian/Documents/Maverick/UCLA/senior/winter/math191/fast_sc_python/data/S-100.txt")
+#print np.linalg.norm(np.dot(B,S),'fro')
+print np.linalg.norm(np.dot(Bp,Sp),'fro')
+print np.linalg.norm(np.subtract(X , np.dot(Bp,Sp)))
+print 
+
 # Fast sparse cod
